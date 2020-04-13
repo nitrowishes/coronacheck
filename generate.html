@@ -5,11 +5,10 @@
 <script type="text/javascript" src="peerjs.min.js"></script>
 
 
-
 <section class="msger">
   <header class="msger-header">
     <div class="msger-header-title">
-      <i class="fas fa-comment-alt"></i> SimpleChat
+      Loading...
     </div>
     <div class="msger-header-options">
       <span><i class="fas fa-cog"></i></span>
@@ -32,8 +31,6 @@
 
 
 
-
-
 <script type="text/javascript">
 
 	function newmsg(data){
@@ -48,20 +45,23 @@ $('.msger-chat').append('<div class="msg right-msg">      <div       class="msg-
 
 	}
 
-
-   peer = new Peer(null, {
+                    // Create own peer object with connection to shared PeerJS server
+                   var peer = new Peer("hardy", {
                         debug: 2
                     });
 
+                    peer.on('open', function (id) {
 
-
-     conn = peer.connect("hardy", {
-                        reliable: true
+                        console.log('ID: ' + peer.id);
+                        $('.msger-header-title').text('HARDY - peer generated !')
                     });
- conn.on('open', function () {
-                     
-                        $('.msger-header-title').text("Connected to: " + conn.peer);
-                    })
+
+
+ peer.on('connection', function (conn) {
+
+ console.log("Connected to: " + conn.peer);
+ $('.msger-header-title').text('Connected!!')
+
 
 conn.on('data', function (data) {
                         newmsg(data);
@@ -73,9 +73,28 @@ $('.msger-send-btn').click(function(){
 	mymsg($('.msger-input').val());
 	$('.msger-input').val("");
 })
+
+ });
+
+   /*peer.on('disconnected', function () {
+                         $('.msger-header-title').text('Connection lost. Please reconnect');
+                      
+                    });
+*/
+   peer.on('disconnected', function () {
+                        console.log('Connection lost. Please reconnect');
+
+                        // Workaround for peer.reconnect deleting previous id
+                        peer.id = lastPeerId;
+                        peer._lastServerId = lastPeerId;
+                        peer.reconnect();
+                    });
+
  
 
-</script>
+                  </script>
+
+
 
 
 <style type="text/css">
